@@ -4,6 +4,7 @@ from datetime import datetime
 
 LEADS = "leads.json"
 
+# Mock lead capture function
 def mock_lead_capture(name, email, platform):
     info = {
         "name": name,

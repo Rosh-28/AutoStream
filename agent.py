@@ -29,6 +29,7 @@ Return STRICT JSON:
 # client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 llm = Ollama(model="llama3")
 
+# Define the agent state
 class AgentState(TypedDict):
     chat_history: List
     intent: str
@@ -38,6 +39,7 @@ class AgentState(TypedDict):
 
 retriever = load_rag()
 
+# Define graph nodes
 def classify_node(state: AgentState) -> AgentState:
     return state
 
@@ -61,6 +63,7 @@ def answer_node(state: AgentState) -> AgentState:
     Platform: {state['platform']}
     """
 
+    # Use gemini API
     # response = client.models.generate_content(
     #     model="models/gemini-1.5-flash",
     #     contents=prompt,

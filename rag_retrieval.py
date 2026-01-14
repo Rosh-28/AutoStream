@@ -3,6 +3,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+# Load RAG retriever
 def load_rag():
     loader = TextLoader("data.md")
     docs = loader.load()
