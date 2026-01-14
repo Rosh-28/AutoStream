@@ -3,5 +3,5 @@ langchain
 langgraph
 gemini
 chromadb
-tiktoken
 python-dotenv
+langchain-community

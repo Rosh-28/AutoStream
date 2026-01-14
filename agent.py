@@ -1,13 +1,14 @@
-from google import genai
-from google.genai import types
+# from google import genai
+# from google.genai import types
+from langchain_community.llms import Ollama
 from typing import TypedDict, List
 from langgraph.graph import StateGraph
 from langchain.schema import HumanMessage, AIMessage 
 from rag_retrieval import load_rag
 from lead import mock_lead_capture
 import os, json
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 INTENT_PROMPT = """
 You are an AI sales agent for AutoStream.
@@ -15,8 +16,8 @@ You are an AI sales agent for AutoStream.
 You must:
 1. Detect intent: casual, product, or high_intent
 2. If product then answer ONLY using the knowledge base
-3. If high_intent then ask for missing lead info (name, email, platform)
-4. If casual then reply normally
+3. If high_intent (when user shows intent like subscribe, signup, try, etc) then ask for missing lead info (NAME, EMAIL, PLATFORM - platform is where they create content, e.g., YouTube, Instagram)
+4. If casual then reply normally like hello, how are you, etc.
 
 Return STRICT JSON:
 {
@@ -25,8 +26,8 @@ Return STRICT JSON:
 }
 """
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
+# client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+llm = Ollama(model="llama3")
 
 class AgentState(TypedDict):
     chat_history: List
@@ -60,17 +61,18 @@ def answer_node(state: AgentState) -> AgentState:
     Platform: {state['platform']}
     """
 
-    response = client.models.generate_content(
-        model="models/gemini-2.0-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(temperature=0)
-    )
+    # response = client.models.generate_content(
+    #     model="models/gemini-1.5-flash",
+    #     contents=prompt,
+    #     config=types.GenerateContentConfig(temperature=0)
+    # )
+    response_text = llm.invoke(prompt)
 
     try:
-        data = json.loads(response.text)
+        data = json.loads(response_text)
         state["intent"] = data["intent"]
         state["chat_history"].append(AIMessage(content=data["response"]))
-    except:
+    except Exception as e:
         state["chat_history"].append(AIMessage(content="Sorry, I had trouble understanding."))
 
     return state
@@ -110,10 +112,16 @@ graph.add_conditional_edges("classify_intent", router,
                                 "lead_capture":"lead_capture",
                             },)
 
-graph.add_edge("product_answer", "classify_intent")
-graph.add_edge("lead_capture", "classify_intent")
+# graph.add_edge("product_answer", "classify_intent")
+# graph.add_edge("lead_capture", "classify_intent")
 
 app = graph.compile()
+
+# from IPython.display import display, Image
+# png_bytes = app.get_graph().draw_mermaid_png()
+
+# with open("graph.png", "wb") as f:
+#     f.write(png_bytes)
 
 def run_agent(user_input, session_state) -> str:
     if "agent_state" not in session_state or session_state.agent_state is None:

@@ -2,9 +2,8 @@ import streamlit as st
 from agent import run_agent
 
 st.set_page_config(page_title="AutoStream AI Agent", layout="centered")
-st.title("🎬 AutoStream AI Agent")
+st.title("AutoStream AI Agent")
 
-# Initialize session state
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
@@ -22,6 +21,5 @@ if user_input:
 
     st.session_state.chat.append(("agent", response))
 
-# Render chat
 for role, msg in st.session_state.chat:
     st.chat_message(role).write(msg)
